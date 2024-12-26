@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
@@ -40,11 +40,6 @@
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "*.ts?(x)": "eslint --fix"
