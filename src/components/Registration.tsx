@@ -1,7 +1,5 @@
 const Registration = () => {
-    return (
-        <h1>registration page</h1>
-    )
+  return <h1>registration page</h1>
 }
 
-export default Registration;
+export default Registration
