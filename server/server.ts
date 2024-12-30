@@ -6,7 +6,7 @@ import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 import { DbUser, convertDbUserToUser } from './dbModels'
-import { findUserByEmail } from './helper'
+import { findUserByEmail, respondWithError } from './helper'
 import { User, Post, Gender } from '../src/models'
 
 // Type for the database schema
@@ -50,26 +50,27 @@ server.post('/register', (req: Request, res: Response) => {
     gender,
   }: RegisterRequestBody = req.body
 
-  if (!firstName || !lastName || !email || !password || !gender) {
-    res.status(400).json({
-      message: 'Firstname, lastname, email, gender, and password are required',
-    })
-    return
+  if (!firstName || !lastName || !email || !gender || !password) {
+    return respondWithError(
+      res,
+      400,
+      'Firstname, lastname, email, gender, and password are required',
+    )
   }
 
   if (password !== confirmPassword) {
-    res
-      .status(400)
-      .json({ message: 'Password and Confirm Password should match' })
-    return
+    return respondWithError(
+      res,
+      400,
+      'Password and Confirm Password should match',
+    )
   }
 
   // Check if user already exists
   const dbUsers = router.db.get('users').value()
   const dbUser = findUserByEmail(dbUsers, email)
   if (dbUser) {
-    res.status(400).json({ message: 'User already exists' })
-    return
+    return respondWithError(res, 400, 'User already exists')
   }
 
   // Hash the password
@@ -105,23 +106,20 @@ server.post('/login', (req, res) => {
   const { email, password }: LoginRequestBody = req.body
 
   if (!email || !password) {
-    res.status(400).json({ message: 'Email and password are required' })
-    return
+    return respondWithError(res, 400, 'Email and password are required')
   }
 
   // Check if user exists
   const dbUsers = router.db.get('users').value()
   const dbUser = findUserByEmail(dbUsers, email)
   if (!dbUser) {
-    res.status(400).json({ message: 'User not found' })
-    return
+    return respondWithError(res, 400, 'User not found')
   }
 
   // Verify the password
   const passwordIsValid = bcrypt.compareSync(password, dbUser.password)
   if (!passwordIsValid) {
-    res.status(400).json({ message: 'Invalid password' })
-    return
+    return respondWithError(res, 400, 'Invalid password')
   }
 
   // Create a JWT token
@@ -148,14 +146,14 @@ const authenticateJwtMiddleware = (
   const token = req.headers['authorization']?.split(' ')[1] // Extract token from 'Authorization' header
 
   if (!token) {
-    res.status(401).json({ message: 'Invalid or expired token' }) // Forbidden if no token is found
-    return
+    // Forbidden if no token is found
+    return respondWithError(res, 401, 'Invalid or expired token')
   }
 
   jwt.verify(token, JwtSecretKey, (err, user) => {
     if (err) {
-      res.status(401).json({ message: 'Invalid or expired token' }) // Forbidden if token is invalid or expired
-      return
+      // Forbidden if token is invalid or expired
+      return respondWithError(res, 401, 'Invalid or expired token')
     }
 
     ;(req as RequestWithUser).user = user as User // Attach the user information (payload) to the request object
@@ -167,8 +165,7 @@ server.get('/users', authenticateJwtMiddleware, (req, res) => {
   const user = (req as RequestWithUser).user
 
   if (user.role !== 'Admin') {
-    res.status(403).json({ message: 'Forbidden' })
-    return
+    return respondWithError(res, 403, 'Forbidden')
   }
 
   const users = router.db.get('users').value()
