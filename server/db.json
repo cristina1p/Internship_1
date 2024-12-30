@@ -1,0 +1,23 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "firstName": "Ana",
+      "lastName": "B",
+      "email": "ana@gmail.com",
+      "gender": "Female",
+      "role": "Admin",
+      "password": "$2a$10$3gP.lB1hesTRVD2shNylNe.w0xDJb0Un/wB6TYApB6VZbiF67pJ8y"
+    },
+    {
+      "id": 2,
+      "firstName": "Elena",
+      "lastName": "P",
+      "email": "elena@gmail.com",
+      "gender": "Female",
+      "role": "User",
+      "password": "$2a$10$NYEV7MvYri3anu7ueY3ud.dU8V63WQbL8LrK8g4gCQg4wu9QdIduG"
+    }
+  ],
+  "posts": []
+}
