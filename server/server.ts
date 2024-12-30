@@ -50,17 +50,17 @@ server.post('/register', (req: Request, res: Response) => {
     gender,
   }: RegisterRequestBody = req.body
 
-  if (password !== confirmPassword) {
-    res
-      .status(400)
-      .json({ message: 'Password and Confirm Password should match' })
-    return
-  }
-
   if (!firstName || !lastName || !email || !password || !gender) {
     res.status(400).json({
       message: 'Firstname, lastname, email, gender, and password are required',
     })
+    return
+  }
+
+  if (password !== confirmPassword) {
+    res
+      .status(400)
+      .json({ message: 'Password and Confirm Password should match' })
     return
   }
 
