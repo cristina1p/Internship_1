@@ -6,6 +6,7 @@ import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 import { DbUser, convertDbUserToUser } from './dbModels'
+import { findUserByEmail } from './helper'
 import { User, Post, Gender } from '../src/models'
 
 // Type for the database schema
@@ -65,8 +66,8 @@ server.post('/register', (req: Request, res: Response) => {
 
   // Check if user already exists
   const dbUsers = router.db.get('users').value()
-  const userExists = dbUsers.find((dbUser) => dbUser.email === email)
-  if (userExists) {
+  const dbUser = findUserByEmail(dbUsers, email)
+  if (dbUser) {
     res.status(400).json({ message: 'User already exists' })
     return
   }
@@ -109,9 +110,8 @@ server.post('/login', (req, res) => {
   }
 
   // Check if user exists
-  const users = router.db.get('users').value()
-  const dbUser = users.find((user) => user.email === email)
-
+  const dbUsers = router.db.get('users').value()
+  const dbUser = findUserByEmail(dbUsers, email)
   if (!dbUser) {
     res.status(400).json({ message: 'User not found' })
     return
