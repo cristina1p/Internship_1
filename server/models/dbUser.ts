@@ -1,4 +1,4 @@
-import { User } from '../src/models'
+import { User } from 'src/models'
 
 export interface DbUser extends User {
   password: string
