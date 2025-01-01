@@ -2,6 +2,7 @@ import jsonServer from 'json-server'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
+import { config } from './config'
 import { Database } from './models'
 import { register } from './route-handlers'
 import { login } from './route-handlers'
@@ -19,7 +20,7 @@ const server = jsonServer.create()
 server.use(jsonServer.bodyParser)
 
 // Assuming `router.db` is a Lowdb instance with a JSON backend
-const router = jsonServer.router<Database>(`${__dirname}/db.json`)
+const router = jsonServer.router<Database>(`${__dirname}${config.dbPath}`)
 // Use default middlewares (for CORS, logging, etc.)
 const middlewares = jsonServer.defaults()
 
@@ -37,7 +38,6 @@ server.use(middlewares)
 server.use(router)
 
 // Start server on a specific port
-const port = process.env.PORT || 3000
-server.listen(port, () => {
-  console.log(`JSON Server is running at http://localhost:${port}`)
+server.listen(config.port, () => {
+  console.log(`JSON Server is running at http://localhost:${config.port}`)
 })

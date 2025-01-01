@@ -37,9 +37,9 @@ export const login =
     // Create a JWT token
     const token = jwt.sign(
       { userId: dbUser.id, email: dbUser.email, role: dbUser.role },
-      config.JwtSecretKey,
+      config.jwtSecretKey,
       {
-        expiresIn: config.JwtExpirationTime,
+        expiresIn: config.jwtExpirationTime,
       },
     )
     res.status(200).json({ message: 'Login successful', token })

@@ -1,5 +1,17 @@
-export const config = {
-  JwtSecretKey:
-    '6586172395e8565d23846bd5a8938525e2ad7c8cecdf7dcc32ce1ca04fffb35e69373e78e27dfe5002cda3c3eb101b550d73630e461f698560ba63b40f078a91',
-  JwtExpirationTime: '1h',
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+interface Config {
+  port: string
+  jwtSecretKey: string
+  jwtExpirationTime: string
+  dbPath: string
+}
+
+export const config: Config = {
+  port: process.env.PORT || '3000',
+  jwtSecretKey: process.env.JWT_SECRET_KEY || 'default-secret-key',
+  jwtExpirationTime: process.env.JWT_EXPIRATION_TIME || '1h',
+  dbPath: '/db.json',
 }

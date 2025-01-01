@@ -22,7 +22,7 @@ export const authenticateJwt = (
     return respondWithError(res, 401, 'Invalid or expired token')
   }
 
-  jwt.verify(token, config.JwtSecretKey, (err, user) => {
+  jwt.verify(token, config.jwtSecretKey, (err, user) => {
     if (err) {
       // Forbidden if token is invalid or expired
       return respondWithError(res, 401, 'Invalid or expired token')
