@@ -2,24 +2,33 @@ import bcrypt from 'bcryptjs'
 import { Request, Response } from 'express'
 import jsonServer from 'json-server'
 import jwt from 'jsonwebtoken'
+import { z } from 'zod'
 
 import { config } from '../config'
 import { respondWithError, findUserByEmail } from '../helper'
 import { Database } from '../models'
 
-interface LoginRequestBody {
-  email: string
-  password: string
-}
-
+// Zod schema, validates the structure of the incoming request body
+export const LoginRequestBodySchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
+})
+// If data does not match this format, zod will return error
 export const login =
   (router: jsonServer.JsonServerRouter<Database>) =>
   (req: Request, res: Response) => {
-    const { email, password }: LoginRequestBody = req.body
+    // Use safeParse for validation
+    const result = LoginRequestBodySchema.safeParse(req.body)
 
-    if (!email || !password) {
-      return respondWithError(res, 400, 'Email and password are required')
+    console.log('Hello')
+
+    if (!result.success) {
+      // Handle validation error
+      const errors = result.error.flatten().fieldErrors
+      return respondWithError(res, 400, 'Validation failed', errors)
     }
+    // Extracting validating data
+    const { email, password } = result.data
 
     // Check if user exists
     const dbUsers = router.db.get('users').value()

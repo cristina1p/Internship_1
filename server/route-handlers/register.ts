@@ -1,47 +1,42 @@
 import bcrypt from 'bcryptjs'
 import { Request, Response } from 'express'
 import jsonServer from 'json-server'
-import { Gender } from 'src/models'
+import { z } from 'zod'
 
 import { respondWithError, findUserByEmail } from '../helper'
 import { Database, DbUser, convertDbUserToUser } from '../models'
 
-interface RegisterRequestBody {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  confirmPassword: string
-  gender: Gender
-}
+const RegisterRequestBodySchema = z
+  .object({
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters long'),
+    confirmPassword: z
+      .string()
+      .min(6, 'Confirm password must be at least 6 characters long'),
+    gender: z.enum(['Male', 'Female', 'Prefer Not to Say'], {
+      message: 'Invalid gender',
+    }),
+  })
+  .refine((data) => data.password == data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'], // Error will be attached to confirmPassword
+  })
 
 export const register =
   (router: jsonServer.JsonServerRouter<Database>) =>
   (req: Request, res: Response) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      gender,
-    }: RegisterRequestBody = req.body
+    // Validate the incoming request body against the zod schema
+    const result = RegisterRequestBodySchema.safeParse(req.body)
 
-    if (!firstName || !lastName || !email || !gender || !password) {
-      return respondWithError(
-        res,
-        400,
-        'Firstname, lastname, email, gender, and password are required',
-      )
+    if (!result.success) {
+      // Handle validation errors
+      const errors = result.error.flatten().fieldErrors
+      return respondWithError(res, 400, 'Validation failed', errors)
     }
-
-    if (password !== confirmPassword) {
-      return respondWithError(
-        res,
-        400,
-        'Password and Confirm Password should match',
-      )
-    }
+    // Extract validated data
+    const { firstName, lastName, email, password, gender } = result.data
 
     // Check if user already exists
     const dbUsers = router.db.get('users').value()
